@@ -1,0 +1,22 @@
+{
+  "configurations": [
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:hello_webpush}",
+      "name": "Debug hello",
+      "program": "${workspaceFolder:hello_webpush}/.build/debug/hello",
+      "preLaunchTask": "swift: Build Debug hello"
+    },
+    {
+      "type": "swift",
+      "request": "launch",
+      "args": [],
+      "cwd": "${workspaceFolder:hello_webpush}",
+      "name": "Release hello",
+      "program": "${workspaceFolder:hello_webpush}/.build/release/hello",
+      "preLaunchTask": "swift: Build Release hello"
+    }
+  ]
+}
