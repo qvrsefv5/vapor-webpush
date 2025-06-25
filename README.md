@@ -50,6 +50,13 @@ npx http-server -f ./index.html
 
 allow notification in browser in system settings
 
+send notification with postman to api endpoint
+
+```
+http://127.0.0.1:8080/api/notifications/notify/:id
+http://localhost:8080/api/notifications/notify/:id
+```
+
 ### See more
 
 - [Vapor Website](https://vapor.codes)
