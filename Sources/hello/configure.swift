@@ -27,6 +27,7 @@ public func configure(_ app: Application) async throws {
     app.migrations.add(CreateTodo())
     app.migrations.add(CreateUser())
     app.migrations.add(CreateToken())
+    app.migrations.add(CreateWebPushSubscription())
     
     /** 
     *SESSION*
@@ -42,7 +43,7 @@ public func configure(_ app: Application) async throws {
      *CORS*
      */
     let corsConfiguration = CORSMiddleware.Configuration(
-            allowedOrigin: .any(["http://localhost:5173", "https://baliky.etabletka.sk"]),
+            allowedOrigin: .any(["http://localhost:5173", "http://localhost:8081", "https://baliky.etabletka.sk"]),
             allowedMethods: [.GET, .POST, .PUT, .OPTIONS, .DELETE, .PATCH],
             allowedHeaders: [.accept, .authorization, .contentType, .origin, .xRequestedWith, .userAgent, .accessControlAllowOrigin, .accessControlAllowCredentials],
             allowCredentials: true
@@ -54,4 +55,6 @@ public func configure(_ app: Application) async throws {
 
     // register routes
     try routes(app)
+    // webpush
+    try configureNotificationService(app)
 }

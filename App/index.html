@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Web Push Test</title>
+  </head>
+  <body>
+    <h1>Web Push Test with Vapor</h1>
+    <button id="subscribe">Subscribe to Push</button>
+
+    <script>
+      let vapidPublicKey;
+      const getVapid = async () => {
+        try {
+          const response = await fetch(
+            "http://127.0.0.1:8080/api/notifications/web-push/vapid"
+          );
+          if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+          }
+          const json = await response.json();
+          console.log(json);
+          vapidPublicKey = json.vapid;
+        } catch (error) {
+          console.error(error.message);
+        }
+      };
+      getVapid();
+
+      // Convert base64 VAPID key to Uint8Array
+      function urlBase64ToUint8Array(base64String) {
+        const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+        const base64 = (base64String + padding)
+          .replace(/-/g, "+")
+          .replace(/_/g, "/");
+        const rawData = window.atob(base64);
+        return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+      }
+
+      // Register Service Worker and Subscribe
+      document
+        .getElementById("subscribe")
+        .addEventListener("click", async () => {
+          if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+            alert("Push notifications not supported in this browser.");
+            return;
+          }
+
+          try {
+            // const registration = await
+            navigator.serviceWorker
+              .register("./service-worker.js")
+              .then((registration) => {
+                console.log(`Service Worker registered: ${registration}`);
+                return navigator.serviceWorker.ready;
+              })
+              .then(async (ServiceWorkerRegistration) => {
+                const subscription =
+                  await ServiceWorkerRegistration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+                  });
+
+                console.log("subscription");
+                console.log(subscription);
+
+                await fetch(
+                  "http://127.0.0.1:8080//api/notifications/web-push/subscription",
+                  {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(subscription),
+                  }
+                );
+
+                return subscription;
+              });
+            // console.log("Service Worker registered:", registration);
+            console.log(
+              `vapid urlBase64 ${urlBase64ToUint8Array(vapidPublicKey)}`
+            );
+            // const subscription = await registration.pushManager.subscribe({
+            //   userVisibleOnly: true,
+            //   applicationServerKey: urlBase64ToUint8Array(vapidPublicKey),
+            // });
+
+            // console.log("Push subscription:", subscription);
+
+            // Send subscription to Vapor server
+
+            alert("Subscribed and sent to server!");
+          } catch (error) {
+            console.error("Error during subscription:", error);
+          }
+        });
+    </script>
+  </body>
+</html>
